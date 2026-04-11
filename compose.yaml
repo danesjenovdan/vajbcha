@@ -1,6 +1,7 @@
 services:
   web:
     build: ./vajbcha
+    command: ["python", "app.py"]
     ports:
       - "5000:5000"
     volumes:
