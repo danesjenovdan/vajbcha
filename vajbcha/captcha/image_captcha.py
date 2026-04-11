@@ -1,5 +1,5 @@
+import io
 import math
-import os
 import random
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
@@ -8,7 +8,7 @@ from .base import BaseCaptcha
 from .font import DotMatrixFont
 
 
-class TextCaptcha(BaseCaptcha):
+class ImageCaptcha(BaseCaptcha):
     """
     Captcha implementation that renders distorted text using Pillow.
 
@@ -36,7 +36,7 @@ class TextCaptcha(BaseCaptcha):
         self._dot_size = dot_size
         self._dot_gap = dot_gap
 
-    def _create_media(self, captcha_id: str, answer: str, media_dir: str) -> None:
+    def _create_media(self, answer: str) -> bytes:
         image = Image.new("RGB", (self.WIDTH, self.HEIGHT), color=self.BG_COLOR)
         draw = ImageDraw.Draw(image)
 
@@ -50,8 +50,9 @@ class TextCaptcha(BaseCaptcha):
 
         self._invert_region(image)
 
-        out_path = os.path.join(media_dir, f"{captcha_id}.png")
-        image.save(out_path, "PNG")
+        buf = io.BytesIO()
+        image.save(buf, "PNG")
+        return buf.getvalue()
 
     # ------------------------------------------------------------------
     # Private helpers

@@ -1,3 +1,4 @@
+import io
 import os
 import random
 import struct
@@ -18,17 +19,13 @@ class AudioCaptcha(BaseCaptcha):
     audio against simple automated transcription.
     """
 
-    MEDIA_EXT = "wav"
-    MEDIA_URL_PATH = "captcha_audio"
-    MEDIA_TYPE = "audio"
+    MEDIA_MIME = "audio/wav"
 
     SPEECH_RATE = 100  # WPM — slow and clear for accessibility
     NOISE_AMPLITUDE = 1500  # max per-sample noise (out of 32767)
     PAUSE_MS = 1000  # silence between letters in milliseconds
 
-    def _create_media(self, captcha_id: str, answer: str, media_dir: str) -> None:
-        out_path = os.path.join(media_dir, f"{captcha_id}.wav")
-
+    def _create_media(self, answer: str) -> bytes:
         tmp_files = []
         try:
             # Generate one WAV per letter using espeak-ng
@@ -52,7 +49,7 @@ class AudioCaptcha(BaseCaptcha):
                 )
 
             # Merge letter WAVs with silence pauses into a single output file
-            self._merge_with_pauses(tmp_files, out_path, self.PAUSE_MS)
+            merged = self._merge_with_pauses(tmp_files, self.PAUSE_MS)
         finally:
             for f in tmp_files:
                 try:
@@ -60,10 +57,10 @@ class AudioCaptcha(BaseCaptcha):
                 except OSError:
                     pass
 
-        self._add_noise(out_path)
+        return self._add_noise(merged)
 
-    def _merge_with_pauses(self, wav_paths: list, out_path: str, pause_ms: int) -> None:
-        """Concatenate WAV files into out_path, inserting silence between each."""
+    def _merge_with_pauses(self, wav_paths: list, pause_ms: int) -> bytes:
+        """Concatenate WAV files into a bytes buffer, inserting silence between each."""
         # Read params from the first file to determine output format
         with wave.open(wav_paths[0], "rb") as wf:
             params = wf.getparams()
@@ -75,7 +72,8 @@ class AudioCaptcha(BaseCaptcha):
         pause_frames = int(framerate * pause_ms / 1000)
         silence = b"\x00" * pause_frames * n_channels * sampwidth
 
-        with wave.open(out_path, "wb") as out_wf:
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as out_wf:
             out_wf.setnchannels(n_channels)
             out_wf.setsampwidth(sampwidth)
             out_wf.setframerate(framerate)
@@ -86,20 +84,22 @@ class AudioCaptcha(BaseCaptcha):
                 if i < len(wav_paths) - 1:
                     out_wf.writeframes(silence)
 
-    def _add_noise(self, path: str) -> None:
+        return buf.getvalue()
+
+    def _add_noise(self, wav_bytes: bytes) -> bytes:
         """
         Mix variable-amplitude random noise into a 16-bit PCM WAV file.
 
         The noise amplitude changes every chunk so different parts of the
         audio have different noise levels — some quiet, some louder.
         """
-        with wave.open(path, "rb") as wf:
+        with wave.open(io.BytesIO(wav_bytes), "rb") as wf:
             params = wf.getparams()
             frames = wf.readframes(params.nframes)
 
         # Only process 16-bit PCM; leave other formats untouched
         if params.sampwidth != 2:
-            return
+            return wav_bytes
 
         n = params.nframes * params.nchannels
         samples = list(struct.unpack(f"{n}h", frames))
@@ -117,6 +117,8 @@ class AudioCaptcha(BaseCaptcha):
 
         noisy_frames = struct.pack(f"{n}h", *result)
 
-        with wave.open(path, "wb") as wf:
+        out_buf = io.BytesIO()
+        with wave.open(out_buf, "wb") as wf:
             wf.setparams(params)
             wf.writeframes(noisy_frames)
+        return out_buf.getvalue()

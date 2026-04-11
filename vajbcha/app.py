@@ -1,30 +1,26 @@
 import os
+import random
+import uuid
 
 from flask import Flask, jsonify, request, send_from_directory
 
-from captcha import AudioCaptcha, TextCaptcha
+from captcha import AudioCaptcha, ImageCaptcha
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "static")
-CAPTCHA_IMAGE_DIR = os.path.join(STATIC_DIR, "captcha_images")
-CAPTCHA_AUDIO_DIR = os.path.join(STATIC_DIR, "captcha_audio")
 
-BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
+ANSWER_LENGTH = 4
+ANSWER_CHARS = "ABCDEFGHIJKLMNOPRSTUVWXYZ"
 
-# Ensure the captcha media directories exist at startup
-os.makedirs(CAPTCHA_IMAGE_DIR, exist_ok=True)
-os.makedirs(CAPTCHA_AUDIO_DIR, exist_ok=True)
-
-app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="/static")
+app = Flask(__name__)
 
 # ---------------------------------------------------------------------------
 # Captcha providers
 # ---------------------------------------------------------------------------
-image_captcha = TextCaptcha()
+image_captcha = ImageCaptcha()
 audio_captcha = AudioCaptcha()
 
 
@@ -33,18 +29,27 @@ audio_captcha = AudioCaptcha()
 # ---------------------------------------------------------------------------
 
 
+def _generate_answer() -> str:
+    return "".join(random.choices(ANSWER_CHARS, k=ANSWER_LENGTH))
+
+
 @app.get("/api/captcha")
 def api_get_captcha():
-    """Generate a new image captcha and return its ID and media URL."""
-    data = image_captcha.generate(CAPTCHA_IMAGE_DIR, BASE_URL)
-    return jsonify(data), 200
-
-
-@app.get("/api/captcha/audio")
-def api_get_audio_captcha():
-    """Generate a new audio captcha and return its ID and media URL."""
-    data = audio_captcha.generate(CAPTCHA_AUDIO_DIR, BASE_URL)
-    return jsonify(data), 200
+    """Generate a captcha pair (image + audio) sharing the same ID and answer."""
+    captcha_id = str(uuid.uuid4()).replace("-", "")
+    answer = _generate_answer()
+    image_data = image_captcha.generate(captcha_id, answer)
+    audio_data = audio_captcha.generate(captcha_id, answer)
+    return (
+        jsonify(
+            {
+                "captcha_id": captcha_id,
+                "image_src": image_data["media_src"],
+                "audio_src": audio_data["media_src"],
+            }
+        ),
+        200,
+    )
 
 
 @app.post("/api/captcha/verify")
@@ -72,9 +77,9 @@ def api_verify_captcha():
     if not answer:
         return jsonify({"success": False, "message": "answer is required."}), 400
 
-    correct = image_captcha.verify(captcha_id, answer) or audio_captcha.verify(
-        captcha_id, answer
-    )
+    image_correct = image_captcha.verify(captcha_id, answer)
+    audio_correct = audio_captcha.verify(captcha_id, answer)
+    correct = image_correct or audio_correct
     if correct:
         return (
             jsonify({"success": True, "message": "Captcha verified successfully."}),

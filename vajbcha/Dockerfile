@@ -22,7 +22,6 @@ WORKDIR /app
 RUN chown vajbcha:vajbcha /app
 
 COPY --chown=vajbcha:vajbcha captcha captcha
-COPY --chown=vajbcha:vajbcha static static
 COPY --chown=vajbcha:vajbcha app.py .
 
 USER vajbcha

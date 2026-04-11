@@ -4,6 +4,3 @@ __pycache__/
 .venv/
 venv/
 env/
-
-static/captcha_images/*
-static/captcha_audio/*

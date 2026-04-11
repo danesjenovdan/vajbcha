@@ -4,12 +4,10 @@ services:
     command: ["python", "app.py"]
     volumes:
       - ./vajbcha/captcha:/app/captcha:delegated,rw
-      - ./vajbcha/static:/app/static:delegated,rw
       - ./vajbcha/app.py:/app/app.py:delegated,rw
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - BASE_URL=http://localhost:8000
 
   nginx:
     build: ./nginx
