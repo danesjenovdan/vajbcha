@@ -9,14 +9,19 @@
 <body>
   <main class="card">
     <h1>Prove you're human</h1>
-    <p class="subtitle">Type the characters shown in the image below.</p>
+    <p class="subtitle" id="captcha-subtitle">Type the characters shown in the image below.</p>
 
     <div class="captcha-wrapper">
       <img id="captcha-img" src="" alt="Captcha image" width="220" height="90" />
+      <audio id="captcha-audio" controls hidden aria-label="Audio captcha"></audio>
       <button type="button" id="refresh-btn" class="btn-icon" title="Get a new captcha" aria-label="Refresh captcha">
         &#x21bb;
       </button>
     </div>
+
+    <button type="button" id="toggle-mode-btn" class="btn-link">
+      Can't see the image? Try audio captcha
+    </button>
 
     <form id="captcha-form" novalidate>
       <label for="captcha-input" class="sr-only">Captcha answer</label>

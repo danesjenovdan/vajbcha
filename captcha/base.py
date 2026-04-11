@@ -10,7 +10,7 @@ import uuid
 class BaseCaptcha(abc.ABC):
     """Abstract base class for captcha implementations.
 
-    Subclasses must implement _create_image(captcha_id, answer, image_dir).
+    Subclasses must implement _create_media(captcha_id, answer, media_dir).
     Swap implementations by changing the instantiated class in app.py.
     """
 
@@ -18,30 +18,37 @@ class BaseCaptcha(abc.ABC):
     ANSWER_CHARS = "ABCDEFGHIJKLMNOPRSTUVWXYZ"
     EXPIRY_SECONDS = 60 * 30  # 30 minutes
 
+    MEDIA_EXT = "png"
+    MEDIA_URL_PATH = "captcha_images"
+    MEDIA_TYPE = "image"
+
     def __init__(self) -> None:
         self._store: dict[str, dict] = {}
         self._lock = threading.Lock()
 
-    def generate(self, image_dir: str, base_url: str) -> dict:
-        """Generate a new captcha, save its image, and return the metadata.
+    def generate(self, media_dir: str, base_url: str) -> dict:
+        """Generate a new captcha, save its media file, and return the metadata.
 
         Args:
-            image_dir: Absolute path to the directory where the image will be saved.
+            media_dir: Absolute path to the directory where the file will be saved.
             base_url: The base URL of the server (e.g. "http://localhost:5000/").
 
         Returns:
-            {"captcha_id": str, "image_url": str}
+            {"captcha_id": str, "media_url": str, "media_type": str}
         """
         captcha_id = str(uuid.uuid4())
         answer = self._generate_answer()
-        self._create_image(captcha_id, answer, image_dir)
+        self._create_media(captcha_id, answer, media_dir)
 
         expires_at = time.time() + self.EXPIRY_SECONDS
         with self._lock:
             self._store[captcha_id] = {"answer": answer, "expires_at": expires_at}
 
-        image_url = f"{base_url.rstrip('/')}/static/captcha_images/{captcha_id}.png"
-        return {"captcha_id": captcha_id, "image_url": image_url}
+        media_url = (
+            f"{base_url.rstrip('/')}/static/{self.MEDIA_URL_PATH}"
+            f"/{captcha_id}.{self.MEDIA_EXT}"
+        )
+        return {"captcha_id": captcha_id, "media_url": media_url, "media_type": self.MEDIA_TYPE}
 
     def verify(self, captcha_id: str, answer: str) -> bool:
         """Verify a captcha answer.
@@ -69,14 +76,14 @@ class BaseCaptcha(abc.ABC):
         return "".join(random.choices(self.ANSWER_CHARS, k=self.ANSWER_LENGTH))
 
     @abc.abstractmethod
-    def _create_image(self, captcha_id: str, answer: str, image_dir: str) -> None:
-        """Render the captcha answer into an image and save it.
+    def _create_media(self, captcha_id: str, answer: str, media_dir: str) -> None:
+        """Render the captcha answer into a media file and save it.
 
-        The image must be saved as:
-            {image_dir}/{captcha_id}.png
+        The file must be saved as:
+            {media_dir}/{captcha_id}.{MEDIA_EXT}
 
         Args:
             captcha_id: Unique identifier for this captcha (use as filename).
-            answer: The text that should appear in the image.
-            image_dir: Directory in which to save the image file.
+            answer: The answer that should be encoded in the media.
+            media_dir: Directory in which to save the file.
         """

@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, jsonify, request, send_from_directory
 
-from captcha import TextCaptcha
+from captcha import AudioCaptcha, TextCaptcha
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -11,16 +11,19 @@ from captcha import TextCaptcha
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 CAPTCHA_IMAGE_DIR = os.path.join(STATIC_DIR, "captcha_images")
+CAPTCHA_AUDIO_DIR = os.path.join(STATIC_DIR, "captcha_audio")
 
-# Ensure the captcha image directory exists at startup
+# Ensure the captcha media directories exist at startup
 os.makedirs(CAPTCHA_IMAGE_DIR, exist_ok=True)
+os.makedirs(CAPTCHA_AUDIO_DIR, exist_ok=True)
 
 app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="/static")
 
 # ---------------------------------------------------------------------------
-# Captcha provider — swap this one line to use a different implementation
+# Captcha providers
 # ---------------------------------------------------------------------------
-captcha_provider = TextCaptcha(dot_size=3, dot_gap=2)
+image_captcha = TextCaptcha(dot_size=3, dot_gap=2)
+audio_captcha = AudioCaptcha()
 
 
 # ---------------------------------------------------------------------------
@@ -45,9 +48,17 @@ def success():
 
 @app.get("/api/captcha")
 def api_get_captcha():
-    """Generate a new captcha and return its ID and image URL."""
+    """Generate a new image captcha and return its ID and media URL."""
     base_url = request.host_url
-    data = captcha_provider.generate(CAPTCHA_IMAGE_DIR, base_url)
+    data = image_captcha.generate(CAPTCHA_IMAGE_DIR, base_url)
+    return jsonify(data), 200
+
+
+@app.get("/api/captcha/audio")
+def api_get_audio_captcha():
+    """Generate a new audio captcha and return its ID and media URL."""
+    base_url = request.host_url
+    data = audio_captcha.generate(CAPTCHA_AUDIO_DIR, base_url)
     return jsonify(data), 200
 
 
@@ -75,7 +86,9 @@ def api_verify_captcha():
     if not answer:
         return jsonify({"success": False, "message": "answer is required."}), 400
 
-    correct = captcha_provider.verify(captcha_id, answer)
+    correct = image_captcha.verify(captcha_id, answer) or audio_captcha.verify(
+        captcha_id, answer
+    )
     if correct:
         return (
             jsonify({"success": True, "message": "Captcha verified successfully."}),

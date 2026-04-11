@@ -35,7 +35,7 @@ class TextCaptcha(BaseCaptcha):
         self._dot_size = dot_size
         self._dot_gap = dot_gap
 
-    def _create_image(self, captcha_id: str, answer: str, image_dir: str) -> None:
+    def _create_media(self, captcha_id: str, answer: str, media_dir: str) -> None:
         image = Image.new("RGB", (self.WIDTH, self.HEIGHT), color=self.BG_COLOR)
         draw = ImageDraw.Draw(image)
 
@@ -49,7 +49,7 @@ class TextCaptcha(BaseCaptcha):
 
         self._invert_region(image)
 
-        out_path = os.path.join(image_dir, f"{captcha_id}.png")
+        out_path = os.path.join(media_dir, f"{captcha_id}.png")
         image.save(out_path, "PNG")
 
     # ------------------------------------------------------------------

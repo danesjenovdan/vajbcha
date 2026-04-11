@@ -1,11 +1,15 @@
 (() => {
   let currentCaptchaId = null;
+  let captchaType = "image"; // "image" | "audio"
 
   const captchaImg = document.getElementById("captcha-img");
+  const captchaAudio = document.getElementById("captcha-audio");
   const captchaInput = document.getElementById("captcha-input");
   const refreshBtn = document.getElementById("refresh-btn");
   const captchaForm = document.getElementById("captcha-form");
   const errorMsg = document.getElementById("error-msg");
+  const subtitle = document.getElementById("captcha-subtitle");
+  const toggleBtn = document.getElementById("toggle-mode-btn");
 
   function showError(message) {
     errorMsg.textContent = message;
@@ -17,22 +21,43 @@
     errorMsg.hidden = true;
   }
 
+  function applyMode() {
+    if (captchaType === "image") {
+      subtitle.textContent = "Type the characters shown in the image below.";
+      toggleBtn.textContent = "Can't see the image? Try audio captcha";
+      captchaImg.hidden = false;
+      captchaAudio.hidden = true;
+      captchaAudio.src = "";
+    } else {
+      subtitle.textContent = "Listen to the audio and type the characters below.";
+      toggleBtn.textContent = "Switch back to image captcha";
+      captchaImg.hidden = true;
+      captchaImg.src = "";
+      captchaAudio.hidden = false;
+    }
+  }
+
   async function loadCaptcha() {
     clearError();
     captchaInput.value = "";
-    captchaImg.src = "";
-    captchaImg.alt = "Loading captcha…";
+
+    const endpoint = captchaType === "audio" ? "/api/captcha/audio" : "/api/captcha";
 
     try {
-      const response = await fetch("/api/captcha");
+      const response = await fetch(endpoint);
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}`);
       }
       const data = await response.json();
       currentCaptchaId = data.captcha_id;
-      // Bust the browser cache so the new image always loads
-      captchaImg.src = data.image_url + "?t=" + Date.now();
-      captchaImg.alt = "Captcha image";
+
+      if (data.media_type === "audio") {
+        // Bust cache so the browser fetches the new WAV
+        captchaAudio.src = data.media_url + "?t=" + Date.now();
+      } else {
+        captchaImg.src = data.media_url + "?t=" + Date.now();
+        captchaImg.alt = "Captcha image";
+      }
     } catch (err) {
       showError("Failed to load captcha. Please refresh the page.");
       console.error("loadCaptcha error:", err);
@@ -51,7 +76,7 @@
     }
 
     if (!currentCaptchaId) {
-      showError("No active captcha. Please wait for the image to load.");
+      showError("No active captcha. Please wait for it to load.");
       return;
     }
 
@@ -76,9 +101,16 @@
     }
   }
 
+  toggleBtn.addEventListener("click", () => {
+    captchaType = captchaType === "image" ? "audio" : "image";
+    applyMode();
+    loadCaptcha();
+  });
+
   refreshBtn.addEventListener("click", loadCaptcha);
   captchaForm.addEventListener("submit", submitForm);
 
   // Load the first captcha when the page is ready
+  applyMode();
   loadCaptcha();
 })();
