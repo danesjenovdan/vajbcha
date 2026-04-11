@@ -59,7 +59,7 @@ class AudioCaptcha(BaseCaptcha):
 
         return self._add_noise(merged)
 
-    def _merge_with_pauses(self, wav_paths: list, pause_ms: int) -> bytes:
+    def _merge_with_pauses(self, wav_paths: list[str], pause_ms: int) -> bytes:
         """Concatenate WAV files into a bytes buffer, inserting silence between each."""
         # Read params from the first file to determine output format
         with wave.open(wav_paths[0], "rb") as wf:

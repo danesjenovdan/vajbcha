@@ -2,7 +2,7 @@ import os
 import random
 import uuid
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request
 
 from captcha import AudioCaptcha, ImageCaptcha
 
@@ -34,7 +34,7 @@ def _generate_answer() -> str:
 
 
 @app.get("/api/captcha")
-def api_get_captcha():
+def api_get_captcha() -> tuple[Response, int]:
     """Generate a captcha pair (image + audio) sharing the same ID and answer."""
     captcha_id = str(uuid.uuid4()).replace("-", "")
     answer = _generate_answer()
@@ -53,7 +53,7 @@ def api_get_captcha():
 
 
 @app.post("/api/captcha/verify")
-def api_verify_captcha():
+def api_verify_captcha() -> tuple[Response, int]:
     """
     Verify a captcha answer.
 

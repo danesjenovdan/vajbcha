@@ -2,6 +2,12 @@ import abc
 import base64
 import threading
 import time
+from typing import TypedDict
+
+
+class _StoreEntry(TypedDict):
+    answers: list[str]
+    expires_at: float
 
 
 class BaseCaptcha(abc.ABC):
@@ -17,10 +23,10 @@ class BaseCaptcha(abc.ABC):
     MEDIA_MIME = "image/png"
 
     def __init__(self) -> None:
-        self._store: dict[str, dict] = {}
+        self._store: dict[str, _StoreEntry] = {}
         self._lock = threading.Lock()
 
-    def generate(self, captcha_id: str, answer: str) -> dict:
+    def generate(self, captcha_id: str, answer: str) -> dict[str, str]:
         """
         Generate a new captcha and return its base64-encoded media.
 

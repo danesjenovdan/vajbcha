@@ -660,7 +660,12 @@ class DotMatrixFont:
         return (w, self.char_height)
 
     def draw_char(
-        self, draw: ImageDraw.ImageDraw, char: str, x: int, y: int, color: tuple
+        self,
+        draw: ImageDraw.ImageDraw,
+        char: str,
+        x: int,
+        y: int,
+        color: tuple[int, int, int, int],
     ) -> None:
         """Draw a single character with its top-left corner at (x, y)."""
         dots = self.GLYPHS.get(char.upper())
@@ -677,7 +682,12 @@ class DotMatrixFont:
                 draw.ellipse([dx, dy, dx + r, dy + r], fill=color)
 
     def draw_text(
-        self, draw: ImageDraw.ImageDraw, text: str, x: int, y: int, color: tuple
+        self,
+        draw: ImageDraw.ImageDraw,
+        text: str,
+        x: int,
+        y: int,
+        color: tuple[int, int, int, int],
     ) -> None:
         """Draw a string of characters starting at (x, y)."""
         advance = self.char_width + self.char_gap
@@ -690,7 +700,7 @@ class DotMatrixFont:
         text: str,
         canvas_width: int,
         y: int,
-        color: tuple,
+        color: tuple[int, int, int, int],
     ) -> None:
         """Draw a string horizontally centered within canvas_width."""
         w, _ = self.measure(text)

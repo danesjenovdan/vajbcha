@@ -58,7 +58,7 @@ class ImageCaptcha(BaseCaptcha):
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _random_color(self, dark: bool = True) -> tuple:
+    def _random_color(self, dark: bool = True) -> tuple[int, int, int]:
         if dark:
             # Subtle dark tones for noise on dark background
             return (
@@ -96,7 +96,7 @@ class ImageCaptcha(BaseCaptcha):
             grid_draw.line([(x, 0), (x, diag)], fill=color, width=1)
         for y in range(0, diag, self.GRID_SPACING):
             grid_draw.line([(0, y), (diag, y)], fill=color, width=1)
-        rotated = grid.rotate(angle, resample=Image.BILINEAR, expand=False)
+        rotated = grid.rotate(angle, resample=Image.Resampling.BILINEAR, expand=False)
         # Crop the center of the rotated canvas to the image size
         cx, cy = diag // 2, diag // 2
         left = cx - self.WIDTH // 2
@@ -155,11 +155,11 @@ class ImageCaptcha(BaseCaptcha):
                 tmp = tmp.crop(pixel_bbox)
 
             angle = random.randint(*self.CHAR_ROTATE_RANGE)
-            rotated = tmp.rotate(angle, expand=True, resample=Image.BILINEAR)
+            rotated = tmp.rotate(angle, expand=True, resample=Image.Resampling.BILINEAR)
             # Downscale back to 1× with antialiasing
             final = rotated.resize(
                 (rotated.width // scale, rotated.height // scale),
-                resample=Image.LANCZOS,
+                resample=Image.Resampling.LANCZOS,
             )
 
             # Target position: center of the slot with vertical jitter
