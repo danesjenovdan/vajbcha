@@ -2,7 +2,8 @@ from PIL import ImageDraw
 
 
 class DotMatrixFont:
-    """Renders uppercase Latin characters and digits as dot-matrix patterns.
+    """
+    Renders uppercase Latin characters and digits as dot-matrix patterns.
 
     Each glyph is a list of (col, row) dot positions within a 5-wide × 7-tall
     grid (origin top-left). No font files are loaded — all shapes are defined
@@ -683,7 +684,7 @@ class DotMatrixFont:
         for i, char in enumerate(text.upper()):
             self.draw_char(draw, char, x + i * advance, y, color)
 
-    def draw_text_centred(
+    def draw_text_centered(
         self,
         draw: ImageDraw.ImageDraw,
         text: str,
@@ -691,6 +692,6 @@ class DotMatrixFont:
         y: int,
         color: tuple,
     ) -> None:
-        """Draw a string horizontally centred within canvas_width."""
+        """Draw a string horizontally centered within canvas_width."""
         w, _ = self.measure(text)
         self.draw_text(draw, text, (canvas_width - w) // 2, y, color)

@@ -100,7 +100,7 @@ class TextCaptcha(BaseCaptcha):
             tmp = Image.new("RGBA", canvas_size, (0, 0, 0, 0))
             tmp_draw = ImageDraw.Draw(tmp)
             color = self._random_color(dark=True)
-            # Draw at the padded offset so the glyph is centred on the canvas
+            # Draw at the padded offset so the glyph is centered on the canvas
             text_x = pad - bbox[0]
             text_y = pad - bbox[1]
             tmp_draw.text((text_x, text_y), char, font=font, fill=color + (255,))
@@ -115,7 +115,7 @@ class TextCaptcha(BaseCaptcha):
             angle = random.randint(*self.CHAR_ROTATE_RANGE)
             rotated = tmp.rotate(angle, expand=True)
 
-            # Target position: centre of the slot with vertical jitter
+            # Target position: center of the slot with vertical jitter
             target_x = slot_w * i + (slot_w - rotated.width) // 2
             jitter_y = random.randint(-self.CHAR_JITTER_Y, self.CHAR_JITTER_Y)
             target_y = (self.HEIGHT - rotated.height) // 2 + jitter_y

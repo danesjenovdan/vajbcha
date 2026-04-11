@@ -36,20 +36,20 @@ def generate_test_image(
     font_tiny = DotMatrixFont(dot_size=1, dot_gap=2, char_gap=3)
 
     # "DOT MATRIX": w=628, h=74
-    font_large.draw_text_centred(draw, "DOT MATRIX", width, 36, (100, 220, 255))
+    font_large.draw_text_centered(draw, "DOT MATRIX", width, 36, (100, 220, 255))
     # "ABCDEFGHIJKLM": w=525, h=47
-    font_medium.draw_text_centred(draw, "ABCDEFGHIJKLM", width, 170, (200, 200, 80))
+    font_medium.draw_text_centered(draw, "ABCDEFGHIJKLM", width, 170, (200, 200, 80))
     # "NOPQRSTUVWXYZ": w=525, h=47
-    font_medium.draw_text_centred(draw, "NOPQRSTUVWXYZ", width, 234, (200, 200, 80))
+    font_medium.draw_text_centered(draw, "NOPQRSTUVWXYZ", width, 234, (200, 200, 80))
     # "0 1 2 3 4 5 6 7 8 9": w=771, h=47
-    font_medium.draw_text_centred(
+    font_medium.draw_text_centered(
         draw, "0 1 2 3 4 5 6 7 8 9", width, 320, (180, 130, 255)
     )
     # tiny labels — each char is 14px wide + 3 gap = 17px advance; 40 chars = 677px
-    font_tiny.draw_text_centred(
+    font_tiny.draw_text_centered(
         draw, "EDIT GENERATE TEST IMAGE PY TO CUSTOMISE", width, 450, (100, 100, 140)
     )
-    font_tiny.draw_text_centred(
+    font_tiny.draw_text_centered(
         draw, os.path.basename(output_path).upper(), width, 490, (70, 70, 100)
     )
 
