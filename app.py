@@ -21,11 +21,7 @@ app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="/static")
 # ---------------------------------------------------------------------------
 # Captcha provider — swap this one line to use a different implementation
 # ---------------------------------------------------------------------------
-_INTO_DOT_MATRIX_FONT = os.path.join(STATIC_DIR, "fonts", "intodotmatrix.ttf")
-_INTO_DOT_MATRIX_SIZE = 32
-captcha_provider = TextCaptcha(
-    font_path=_INTO_DOT_MATRIX_FONT, font_size=_INTO_DOT_MATRIX_SIZE
-)
+captcha_provider = TextCaptcha(dot_size=4, dot_gap=2, char_gap=8)
 
 
 # ---------------------------------------------------------------------------
