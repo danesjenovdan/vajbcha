@@ -87,7 +87,8 @@ class AudioCaptcha(BaseCaptcha):
                     out_wf.writeframes(silence)
 
     def _add_noise(self, path: str) -> None:
-        """Mix variable-amplitude random noise into a 16-bit PCM WAV file.
+        """
+        Mix variable-amplitude random noise into a 16-bit PCM WAV file.
 
         The noise amplitude changes every chunk so different parts of the
         audio have different noise levels — some quiet, some louder.

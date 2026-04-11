@@ -1,10 +1,12 @@
 services:
   web:
-    build: .
+    build: ./vajbcha
     ports:
       - "5000:5000"
     volumes:
-      - .:/app
+      - ./vajbcha/captcha:/app/captcha
+      - ./vajbcha/static:/app/static
+      - ./vajbcha/app.py:/app/app.py
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1

@@ -22,7 +22,7 @@ app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="/static")
 # ---------------------------------------------------------------------------
 # Captcha providers
 # ---------------------------------------------------------------------------
-image_captcha = TextCaptcha(dot_size=3, dot_gap=2)
+image_captcha = TextCaptcha()
 audio_captcha = AudioCaptcha()
 
 
@@ -64,7 +64,8 @@ def api_get_audio_captcha():
 
 @app.post("/api/captcha/verify")
 def api_verify_captcha():
-    """Verify a captcha answer.
+    """
+    Verify a captcha answer.
 
     Request body (JSON):
         captcha_id: str

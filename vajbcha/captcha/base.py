@@ -8,7 +8,8 @@ import uuid
 
 
 class BaseCaptcha(abc.ABC):
-    """Abstract base class for captcha implementations.
+    """
+    Abstract base class for captcha implementations.
 
     Subclasses must implement _create_media(captcha_id, answer, media_dir).
     Swap implementations by changing the instantiated class in app.py.
@@ -27,7 +28,8 @@ class BaseCaptcha(abc.ABC):
         self._lock = threading.Lock()
 
     def generate(self, media_dir: str, base_url: str) -> dict:
-        """Generate a new captcha, save its media file, and return the metadata.
+        """
+        Generate a new captcha, save its media file, and return the metadata.
 
         Args:
             media_dir: Absolute path to the directory where the file will be saved.
@@ -60,7 +62,8 @@ class BaseCaptcha(abc.ABC):
         }
 
     def verify(self, captcha_id: str, answer: str) -> bool:
-        """Verify a captcha answer.
+        """
+        Verify a captcha answer.
 
         The captcha is consumed on first call (prevents replay attacks).
 
@@ -108,7 +111,8 @@ class BaseCaptcha(abc.ABC):
 
     @abc.abstractmethod
     def _create_media(self, captcha_id: str, answer: str, media_dir: str) -> None:
-        """Render the captcha answer into a media file and save it.
+        """
+        Render the captcha answer into a media file and save it.
 
         The file must be saved as:
             {media_dir}/{captcha_id}.{MEDIA_EXT}

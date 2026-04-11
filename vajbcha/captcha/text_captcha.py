@@ -9,7 +9,8 @@ from .font import DotMatrixFont
 
 
 class TextCaptcha(BaseCaptcha):
-    """Captcha implementation that renders distorted text using Pillow.
+    """
+    Captcha implementation that renders distorted text using Pillow.
 
     Characters are drawn individually with random rotation and positional
     jitter. Random noise lines and dots are added to hinder automated
@@ -30,7 +31,7 @@ class TextCaptcha(BaseCaptcha):
     GRID_ROTATE_RANGE = (-25, 25)  # degrees
     CHAR_JITTER_Y = 20  # pixels
 
-    def __init__(self, dot_size: int = 4, dot_gap: int = 2) -> None:
+    def __init__(self, dot_size: int = 3, dot_gap: int = 2) -> None:
         super().__init__()
         self._dot_size = dot_size
         self._dot_gap = dot_gap
