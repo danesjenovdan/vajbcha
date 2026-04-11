@@ -18,7 +18,7 @@
 
   const me = document.currentScript;
   const inputName = me.dataset.inputName || "captcha-answer";
-  const baseUrl = me.dataset.baseUrl || "https://captcha.lb.djnd.si";
+  const baseUrl = me.dataset.baseUrl || "https://vajbcha.danesjenovdan.si";
   const locale = me.dataset.locale || "en";
   const msgs = MESSAGES[locale] || MESSAGES["en"];
 
@@ -26,12 +26,12 @@
   if (
     me.previousElementSibling &&
     me.previousElementSibling.tagName === "DIV" &&
-    me.previousElementSibling.id === "djncaptcha"
+    me.previousElementSibling.id === "vajbcha"
   ) {
     container = me.previousElementSibling;
   } else {
     container = document.createElement("div");
-    container.id = "djncaptcha";
+    container.id = "vajbcha";
     me.parentNode.insertBefore(container, me);
   }
 
@@ -43,8 +43,8 @@
 
   const iframe = document.createElement("iframe");
   iframe.style.display = "block";
-  iframe.style.width = "322px";
-  iframe.style.height = "185px";
+  iframe.style.width = "280px";
+  iframe.style.height = "140px";
   iframe.style.backgroundColor = "transparent";
   iframe.style.border = "0";
 
@@ -55,14 +55,14 @@
     const wrapper = doc.createElement("div");
     wrapper.style.boxSizing = "border-box";
     wrapper.style.display = "flex";
-    wrapper.style.padding = "10px";
+    wrapper.style.padding = "6px";
     wrapper.style.backgroundColor = "white";
-    wrapper.style.border = "1px solid #888";
-    wrapper.style.borderRadius = "8px";
+    wrapper.style.border = "1px solid rgb(127 127 127 / 0.5)";
+    wrapper.style.borderRadius = "4px";
     doc.body.appendChild(wrapper);
 
     const imgContainer = doc.createElement("div");
-    imgContainer.style.flex = "0 0 250px";
+    imgContainer.style.flex = "0 0 220px";
     wrapper.appendChild(imgContainer);
 
     const buttonsContainer = doc.createElement("div");
@@ -72,23 +72,23 @@
     buttonsContainer.style.flexDirection = "column";
     buttonsContainer.style.justifyContent = "flex-start";
     buttonsContainer.style.gap = "4px";
-    buttonsContainer.style.paddingLeft = "10px";
+    buttonsContainer.style.paddingLeft = "6px";
     wrapper.appendChild(buttonsContainer);
 
     const imgWrapper = doc.createElement("div");
     imgWrapper.style.boxSizing = "border-box";
     imgWrapper.style.position = "relative";
-    imgWrapper.style.width = "250px";
-    imgWrapper.style.height = "125px";
-    imgWrapper.style.border = "1px solid #888";
-    imgWrapper.style.borderRadius = "8px 8px 0 0";
+    imgWrapper.style.width = "220px";
+    imgWrapper.style.height = "90px";
+    imgWrapper.style.border = "1px solid rgb(127 127 127 / 0.5)";
+    imgWrapper.style.borderRadius = "4px";
     imgWrapper.style.overflow = "hidden";
     imgContainer.appendChild(imgWrapper);
 
     const img = doc.createElement("img");
     img.style.margin = "-1px";
-    img.style.width = "250px";
-    img.style.height = "125px";
+    img.style.width = "220px";
+    img.style.height = "90px";
     img.src = "data:image/png;base64,";
     img.alt = msgs.captchaLoading;
     imgWrapper.appendChild(img);
@@ -106,13 +106,14 @@
     input.style.width = "100%";
     input.style.padding = "0 6px";
     input.style.backgroundColor = "white";
-    input.style.border = "1px solid #888";
-    input.style.borderRadius = "0 0 8px 8px";
-    input.style.fontFamily = "'Segoe UI', Helvetica, Arial, sans-serif";
-    input.style.fontSize = "16px";
-    input.style.fontWeight = "400";
+    input.style.border = "1px solid rgb(127 127 127 / 0.5)";
+    input.style.borderRadius = "4px";
+    input.style.fontFamily = "monospace";
+    input.style.fontSize = "20px";
+    input.style.fontWeight = "700";
     input.style.height = "32px";
     input.style.lineHeight = "32px";
+    input.style.textTransform = "uppercase";
     inputForm.appendChild(input);
 
     function createButton(text, svg) {
@@ -124,8 +125,8 @@
       button.style.height = "40px";
       button.style.padding = "0";
       button.style.background = "transparent";
-      button.style.border = "1px solid #333";
-      button.style.borderRadius = "50%";
+      button.style.border = "1px solid rgb(127 127 127 / 0.5)";
+      button.style.borderRadius = "4px";
       button.style.cursor = "pointer";
       const span = doc.createElement("span");
       span.textContent = text;
@@ -149,7 +150,7 @@
           <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
           <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
         </svg>
-      `
+      `,
     );
     refresh.title = msgs.captchaRefresh;
     refresh.disabled = true;
@@ -182,7 +183,7 @@
 
     function insertCaptchaImage(data) {
       captchaId = data.captchaId;
-      img.src = `data:image/png;base64,${data.captchaImg}`;
+      img.src = data.media_src;
       img.alt = "CAPTCHA";
       input.value = "";
       captchaInput = "";
@@ -206,7 +207,9 @@
       refresh.disabled = true;
       refresh.style.opacity = "0.5";
       const previousCaptchaId = captchaId;
-      fetch(`${baseUrl}/api/reloadCaptchaImg/${previousCaptchaId}?locale=en-GB`)
+      fetch(
+        `${baseUrl}/api/captcha?locale=${locale}&previous=${previousCaptchaId}`,
+      )
         .then((response) => response.json())
         .then((data) => {
           insertCaptchaImage(data);
@@ -245,14 +248,14 @@
       hiddenInput.value = `${captchaId};${captchaInput}`;
     });
 
-    fetch(`${baseUrl}/api/captchaImg?locale=en-GB`)
+    fetch(`${baseUrl}/api/captcha?locale=${locale}`)
       .then((response) => response.json())
       .then((data) => {
         insertCaptchaImage(data);
       });
 
-    window.djnCAPTCHA = window.djnCAPTCHA || {};
-    window.djnCAPTCHA[inputName] = {
+    window.vajbcha = window.vajbcha || {};
+    window.vajbcha[inputName] = {
       value: () => {
         return `${captchaId};${captchaInput}`;
       },
@@ -267,8 +270,8 @@
         if (me.parentElement) {
           me.remove();
         }
-        if (window.djnCAPTCHA[inputName]) {
-          delete window.djnCAPTCHA[inputName];
+        if (window.vajbcha[inputName]) {
+          delete window.vajbcha[inputName];
         }
       },
     };

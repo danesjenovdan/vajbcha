@@ -38,7 +38,7 @@ class BaseCaptcha(abc.ABC):
         Returns:
             {"captcha_id": str, "media_url": str, "media_type": str}
         """
-        captcha_id = str(uuid.uuid4())
+        captcha_id = str(uuid.uuid4()).replace("-", "")
         answer = self._generate_answer()
         self._create_media(captcha_id, answer, media_dir)
 

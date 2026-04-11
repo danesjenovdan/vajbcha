@@ -1,69 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta name="color-scheme" content="dark light" />
+    <title>vajbcha test</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
+        margin: 0;
+        font-size: 14px;
         font-family: sans-serif;
       }
       h1 {
         text-align: center;
       }
       .form-container {
-        width: 600px;
+        max-width: 425px;
         margin: 0 auto;
-        padding: 30px 50px;
-        border: 1px solid black;
-        background-color: beige;
-        font-size: 20px;
+        padding: 1rem;
+        border: 1px solid CanvasText;
+        font-size: 1rem;
         font-weight: 700;
         line-height: 1.5;
-        color: red;
-      }
-      .form-container h2 {
-        margin-top: 0;
       }
       .form-container .form-field {
         display: flex;
         flex-direction: column;
         margin-bottom: 20px;
       }
+      .form-container .form-field label {
+        margin-bottom: 0.25rem;
+      }
       .form-container .form-field input {
-        width: 300px;
         padding: 5px;
-        font-size: 20px;
+        font: inherit;
       }
       .form-container button {
+        display: block;
         width: 100%;
-        padding: 10px;
-        font-size: 20px;
+        padding: 0.5rem;
+        font: inherit;
         font-weight: 700;
-        background-color: red;
-        color: white;
-        border: none;
-        border-radius: 5px;
         cursor: pointer;
-      }
-      .form-container button:disabled {
-        background-color: gray;
-        cursor: not-allowed;
       }
     </style>
   </head>
   <body>
-    <h1>djnCAPTCHA test</h1>
+    <h1>vajbcha test</h1>
 
     <div class="form-container">
       <form action="javascript;">
-        <h2>Some page header</h2>
-        <p>
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sequi harum
-          quaerat corporis excepturi temporibus, eum dolores hic explicabo rerum
-          et ea quas amet perspiciatis saepe obcaecati laboriosam autem ex
-          animi.
-        </p>
         <div class="form-field">
           <label for="username_1">Username:</label>
           <input
@@ -84,19 +73,17 @@
             disabled
           />
         </div>
-
         <div class="form-field captcha-container">
-          <label for="">djnCAPTCHA:</label>
+          <label for="">CAPTCHA:</label>
           <div class="captcha">
             <script
-              src="/js/djncaptcha.js"
+              src="/js/vajbcha.js"
               data-input-name="captcha-test"
               data-base-url="http://localhost:8000"
               data-locale="sl"
             ></script>
           </div>
         </div>
-
         <button type="submit" value="submit_1">Submit</button>
       </form>
 
@@ -104,7 +91,7 @@
         const form = document.querySelector("form");
         form.addEventListener("submit", (e) => {
           e.preventDefault();
-          window.djnCAPTCHA["captcha-test"].reload();
+          window.vajbcha["captcha-test"].reload();
         });
       </script>
     </div>

@@ -1,13 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
     <title>Django Integration Example</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-size: 14px;
+        font-family: sans-serif;
+      }
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+      p {
+        line-height: 1.5;
+      }
+      p.lead {
+        font-size: 1.125rem;
+        font-weight: 500;
+      }
+      code {
+        padding: 0.125rem 0.25rem;
+        background-color: rgb(127 127 127 / 0.25);
+        border-radius: 0.125rem;
+      }
+    </style>
     <link
       href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/default.min.css"
       rel="stylesheet"
@@ -16,15 +40,13 @@
   </head>
   <body>
     <div class="container">
-      <div class="row">
-        <div class="col">
-          <h1 class="text-center my-4">Django Integration Example</h1>
-          <h2>
-            Example for simple method views and class-based views.
-          </h2>
+      <div>
+        <div>
+          <h1>Django Integration Example</h1>
+          <h2>Example for simple method views and class-based views.</h2>
 
           <p class="lead">Add to <code>settings.py</code></p>
-          <pre><code class="language-python">CAPTCHA_BASE_URL = 'https://captcha.lb.djnd.si/api'</code></pre>
+          <pre><code class="language-python">CAPTCHA_BASE_URL = 'https://vajbcha.danesjenovdan.si'</code></pre>
 
           <p class="lead">Create <code>captcha.py</code></p>
           <pre><code class="language-python">import requests
@@ -41,7 +63,8 @@ def validate_captcha(captcha_query):
 
     try:
         response = requests.post(
-            f"{settings.CAPTCHA_BASE_URL}/validateCaptcha/{captcha_id}?captchaAnswer={captcha_answer}",
+            f"{settings.CAPTCHA_BASE_URL}/api/captcha/verify",
+            json={"captcha_id": captcha_id, "answer": captcha_answer},
             timeout=10,
         )
         response.raise_for_status()
@@ -56,7 +79,9 @@ def validate_captcha(captcha_query):
 
     return response_json["responseCaptcha"] == "success"</code></pre>
 
-          <p class="lead">Validate in <code>views.py</code> or <code>api.py</code></p>
+          <p class="lead">
+            Validate in <code>views.py</code> or <code>api.py</code>
+          </p>
           <pre><code class="language-python">from module.captcha import validate_captcha
 
 def post(self, request, *args, **kwargs):
@@ -80,7 +105,12 @@ def post(self, request, *args, **kwargs):
   <!-- captcha field -->
   <div class="form-field">
     <label>CAPTCHA:</label>
-    <script src="https://captcha.lb.djnd.si/js/djncaptcha.js" data-input-name="captcha-answer"></script>
+    <script
+      src="https://vajbcha.danesjenovdan.si/js/vajbcha.js"
+      data-input-name="captcha-answer"
+      data-base-url="https://vajbcha.danesjenovdan.si"
+      data-locale="sl"
+    ></script>
   </div>
 </form></textarea></code></pre>
         </div>

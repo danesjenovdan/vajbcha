@@ -13,6 +13,8 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 CAPTCHA_IMAGE_DIR = os.path.join(STATIC_DIR, "captcha_images")
 CAPTCHA_AUDIO_DIR = os.path.join(STATIC_DIR, "captcha_audio")
 
+BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
+
 # Ensure the captcha media directories exist at startup
 os.makedirs(CAPTCHA_IMAGE_DIR, exist_ok=True)
 os.makedirs(CAPTCHA_AUDIO_DIR, exist_ok=True)
@@ -27,21 +29,6 @@ audio_captcha = AudioCaptcha()
 
 
 # ---------------------------------------------------------------------------
-# Page routes
-# ---------------------------------------------------------------------------
-
-
-@app.route("/")
-def index():
-    return send_from_directory(STATIC_DIR, "index.html")
-
-
-@app.route("/success")
-def success():
-    return send_from_directory(STATIC_DIR, "success.html")
-
-
-# ---------------------------------------------------------------------------
 # REST API
 # ---------------------------------------------------------------------------
 
@@ -49,16 +36,14 @@ def success():
 @app.get("/api/captcha")
 def api_get_captcha():
     """Generate a new image captcha and return its ID and media URL."""
-    base_url = request.host_url
-    data = image_captcha.generate(CAPTCHA_IMAGE_DIR, base_url)
+    data = image_captcha.generate(CAPTCHA_IMAGE_DIR, BASE_URL)
     return jsonify(data), 200
 
 
 @app.get("/api/captcha/audio")
 def api_get_audio_captcha():
     """Generate a new audio captcha and return its ID and media URL."""
-    base_url = request.host_url
-    data = audio_captcha.generate(CAPTCHA_AUDIO_DIR, base_url)
+    data = audio_captcha.generate(CAPTCHA_AUDIO_DIR, BASE_URL)
     return jsonify(data), 200
 
 
