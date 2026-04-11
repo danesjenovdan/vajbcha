@@ -3,6 +3,7 @@ import os
 from flask import Flask, jsonify, request, send_from_directory
 
 from captcha import TextCaptcha
+from generate_test_image import generate_test_image
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -40,6 +41,18 @@ def index():
 @app.route("/success")
 def success():
     return send_from_directory(STATIC_DIR, "success.html")
+
+
+@app.route("/test")
+def test():
+    return send_from_directory(STATIC_DIR, "test.html")
+
+
+@app.route("/static/test.png")
+def test_image():
+    path = os.path.join(STATIC_DIR, "test.png")
+    generate_test_image(path)
+    return send_from_directory(STATIC_DIR, "test.png")
 
 
 # ---------------------------------------------------------------------------
