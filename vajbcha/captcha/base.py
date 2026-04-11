@@ -26,18 +26,19 @@ class BaseCaptcha(abc.ABC):
         self._store: dict[str, _StoreEntry] = {}
         self._lock = threading.Lock()
 
-    def generate(self, captcha_id: str, answer: str) -> dict[str, str]:
+    def generate(self, captcha_id: str, answer: str, locale: str) -> dict[str, str]:
         """
         Generate a new captcha and return its base64-encoded media.
 
         Args:
             captcha_id: Shared identifier for this captcha pair.
             answer: The answer to encode in the media.
+            locale: The locale for the captcha (e.g., "en", "sl").
 
         Returns:
             {"captcha_id": str, "media_src": str}
         """
-        media_bytes = self._create_media(answer)
+        media_bytes = self._create_media(answer, locale)
         media_src = (
             f"data:{self.MEDIA_MIME};base64," + base64.b64encode(media_bytes).decode()
         )
@@ -85,12 +86,13 @@ class BaseCaptcha(abc.ABC):
                 del self._store[cid]
 
     @abc.abstractmethod
-    def _create_media(self, answer: str) -> bytes:
+    def _create_media(self, answer: str, locale: str) -> bytes:
         """
         Render the captcha answer into media and return its raw bytes.
 
         Args:
             answer: The answer that should be encoded in the media.
+            locale: The locale for the captcha (e.g., "en", "sl").
 
         Returns:
             Raw bytes of the media file (PNG, WAV, etc.).

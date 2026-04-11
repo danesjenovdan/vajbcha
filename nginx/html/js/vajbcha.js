@@ -182,8 +182,8 @@
     let audioCaptcha = null;
 
     function insertCaptchaImage(data) {
-      captchaId = data.captchaId;
-      img.src = data.media_src;
+      captchaId = data.captcha_id;
+      img.src = data.image_src;
       img.alt = "CAPTCHA";
       input.value = "";
       captchaInput = "";
@@ -191,7 +191,7 @@
       refresh.disabled = false;
       refresh.style.opacity = "1";
       refresh.style.cursor = "pointer";
-      audioSrc = `data:audio/wav;base64,${data.audioCaptcha}`;
+      audioSrc = data.audio_src;
       if (audioCaptcha) {
         audioCaptcha.pause();
         audioCaptcha = null;
@@ -207,9 +207,7 @@
       refresh.disabled = true;
       refresh.style.opacity = "0.5";
       const previousCaptchaId = captchaId;
-      fetch(
-        `${baseUrl}/api/captcha?locale=${locale}&previous=${previousCaptchaId}`,
-      )
+      fetch(`${baseUrl}/api/captcha?locale=${locale}`)
         .then((response) => response.json())
         .then((data) => {
           insertCaptchaImage(data);

@@ -14,6 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ANSWER_LENGTH = 4
 ANSWER_CHARS = "ABCDEFGHIJKLMNOPRSTUVWXYZ"
+VALID_LOCALES = {"en", "sl"}
 
 app = Flask(__name__)
 
@@ -29,6 +30,10 @@ audio_captcha = AudioCaptcha()
 # ---------------------------------------------------------------------------
 
 
+def _generate_id() -> str:
+    return str(uuid.uuid4()).replace("-", "")
+
+
 def _generate_answer() -> str:
     return "".join(random.choices(ANSWER_CHARS, k=ANSWER_LENGTH))
 
@@ -36,10 +41,14 @@ def _generate_answer() -> str:
 @app.get("/api/captcha")
 def api_get_captcha() -> tuple[Response, int]:
     """Generate a captcha pair (image + audio) sharing the same ID and answer."""
-    captcha_id = str(uuid.uuid4()).replace("-", "")
+    locale = request.args.get("locale", "en")
+    if locale not in VALID_LOCALES:
+        locale = "en"
+
+    captcha_id = _generate_id()
     answer = _generate_answer()
-    image_data = image_captcha.generate(captcha_id, answer)
-    audio_data = audio_captcha.generate(captcha_id, answer)
+    image_data = image_captcha.generate(captcha_id, answer, locale)
+    audio_data = audio_captcha.generate(captcha_id, answer, locale)
     return (
         jsonify(
             {

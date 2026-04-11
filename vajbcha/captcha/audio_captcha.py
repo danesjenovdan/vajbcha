@@ -25,7 +25,7 @@ class AudioCaptcha(BaseCaptcha):
     NOISE_AMPLITUDE = 1500  # max per-sample noise (out of 32767)
     PAUSE_MS = 1000  # silence between letters in milliseconds
 
-    def _create_media(self, answer: str) -> bytes:
+    def _create_media(self, answer: str, locale: str) -> bytes:
         tmp_files = []
         try:
             # Generate one WAV per letter using espeak-ng
@@ -39,7 +39,7 @@ class AudioCaptcha(BaseCaptcha):
                         "-w",
                         tmp_path,
                         "-v",
-                        "sl",
+                        locale,
                         "-s",
                         str(self.SPEECH_RATE),
                         letter,

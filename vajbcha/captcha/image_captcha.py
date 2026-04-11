@@ -36,7 +36,7 @@ class ImageCaptcha(BaseCaptcha):
         self._dot_size = dot_size
         self._dot_gap = dot_gap
 
-    def _create_media(self, answer: str) -> bytes:
+    def _create_media(self, answer: str, locale: str) -> bytes:
         image = Image.new("RGB", (self.WIDTH, self.HEIGHT), color=self.BG_COLOR)
         draw = ImageDraw.Draw(image)
 
