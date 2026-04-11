@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, jsonify, request, send_from_directory
 
-from captcha import TextCaptcha, DiceCaptcha
+from captcha import TextCaptcha
 
 # ---------------------------------------------------------------------------
 # Configuration
