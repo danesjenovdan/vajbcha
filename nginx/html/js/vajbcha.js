@@ -43,8 +43,8 @@
 
   const iframe = document.createElement("iframe");
   iframe.style.display = "block";
-  iframe.style.width = "280px";
-  iframe.style.height = "140px";
+  iframe.style.width = "282px";
+  iframe.style.height = "168px";
   iframe.style.backgroundColor = "transparent";
   iframe.style.border = "0";
 
@@ -71,7 +71,7 @@
     buttonsContainer.style.display = "flex";
     buttonsContainer.style.flexDirection = "column";
     buttonsContainer.style.justifyContent = "flex-start";
-    buttonsContainer.style.gap = "4px";
+    buttonsContainer.style.gap = "6px";
     buttonsContainer.style.paddingLeft = "6px";
     wrapper.appendChild(buttonsContainer);
 
@@ -95,34 +95,47 @@
 
     const inputForm = doc.createElement("form");
     inputForm.style.display = "flex";
+    inputForm.style.flexDirection = "column";
     inputForm.style.margin = "4px 0 0 0";
     imgContainer.appendChild(inputForm);
+
+    const label = doc.createElement("label");
+    label.textContent = msgs.captchaType;
+    label.style.fontFamily = "monospace";
+    label.style.fontWeight = "500";
+    label.style.fontSize = "12px";
+    label.style.lineHeight = "1.2";
+    label.style.textAlign = "center";
+    // label.style.textTransform = "uppercase";
+    inputForm.appendChild(label);
 
     const input = doc.createElement("input");
     input.type = "text";
     input.value = "";
-    input.placeholder = msgs.captchaType;
     input.style.boxSizing = "border-box";
+    input.style.marginTop = "4px";
     input.style.width = "100%";
     input.style.padding = "0 6px";
     input.style.backgroundColor = "white";
     input.style.border = "1px solid rgb(127 127 127 / 0.5)";
     input.style.borderRadius = "4px";
     input.style.fontFamily = "monospace";
-    input.style.fontSize = "20px";
+    input.style.fontSize = "32px";
     input.style.fontWeight = "700";
-    input.style.height = "32px";
-    input.style.lineHeight = "32px";
+    input.style.height = "42px";
+    input.style.lineHeight = "42px";
+    input.style.textAlign = "center";
     input.style.textTransform = "uppercase";
-    inputForm.appendChild(input);
+    input.style.letterSpacing = "8px";
+    label.appendChild(input);
 
     function createButton(text, svg) {
       const button = doc.createElement("button");
       button.type = "button";
       button.style.boxSizing = "border-box";
       button.style.position = "relative";
-      button.style.width = "40px";
-      button.style.height = "40px";
+      button.style.width = "42px";
+      button.style.height = "42px";
       button.style.padding = "0";
       button.style.background = "transparent";
       button.style.border = "1px solid rgb(127 127 127 / 0.5)";
