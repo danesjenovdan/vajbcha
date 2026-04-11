@@ -20,12 +20,17 @@ app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="/static")
 # ---------------------------------------------------------------------------
 # Captcha provider — swap this one line to use a different implementation
 # ---------------------------------------------------------------------------
-captcha_provider = TextCaptcha()
+_INTO_DOT_MATRIX_FONT = os.path.join(STATIC_DIR, "fonts", "intodotmatrix.ttf")
+_INTO_DOT_MATRIX_SIZE = 32
+captcha_provider = TextCaptcha(
+    font_path=_INTO_DOT_MATRIX_FONT, font_size=_INTO_DOT_MATRIX_SIZE
+)
 
 
 # ---------------------------------------------------------------------------
 # Page routes
 # ---------------------------------------------------------------------------
+
 
 @app.route("/")
 def index():
@@ -40,6 +45,7 @@ def success():
 # ---------------------------------------------------------------------------
 # REST API
 # ---------------------------------------------------------------------------
+
 
 @app.get("/api/captcha")
 def api_get_captcha():
@@ -75,8 +81,19 @@ def api_verify_captcha():
 
     correct = captcha_provider.verify(captcha_id, answer)
     if correct:
-        return jsonify({"success": True, "message": "Captcha verified successfully."}), 200
-    return jsonify({"success": False, "message": "Incorrect or expired captcha. Please try again."}), 200
+        return (
+            jsonify({"success": True, "message": "Captcha verified successfully."}),
+            200,
+        )
+    return (
+        jsonify(
+            {
+                "success": False,
+                "message": "Incorrect or expired captcha. Please try again.",
+            }
+        ),
+        200,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -84,4 +101,4 @@ def api_verify_captcha():
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0")

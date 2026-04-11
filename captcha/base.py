@@ -14,8 +14,8 @@ class BaseCaptcha(abc.ABC):
     Swap implementations by changing the instantiated class in app.py.
     """
 
-    ANSWER_LENGTH = 6
-    ANSWER_CHARS = string.ascii_uppercase + string.digits
+    ANSWER_LENGTH = 4
+    ANSWER_CHARS = string.ascii_uppercase
     EXPIRY_SECONDS = 300  # 5 minutes
 
     def __init__(self) -> None:

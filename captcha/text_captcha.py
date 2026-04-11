@@ -26,7 +26,7 @@ class TextCaptcha(BaseCaptcha):
     CHAR_ROTATE_RANGE = (-30, 30)  # degrees
     CHAR_JITTER_Y = 8  # pixels
 
-    def __init__(self, font_path: str | None = None, font_size: int = 40) -> None:
+    def __init__(self, font_path: str | None = None, font_size: int = 32) -> None:
         super().__init__()
         self._font_path = font_path
         self._font_size = font_size
@@ -50,28 +50,22 @@ class TextCaptcha(BaseCaptcha):
     # ------------------------------------------------------------------
 
     def _get_font(self):
-        try:
-            if self._font_path:
-                return ImageFont.truetype(self._font_path, self._font_size)
-            # Try common system monospace fonts
-            for candidate in ("DejaVuSans-Bold.ttf", "LiberationMono-Bold.ttf", "FreeMono.ttf"):
-                for search_dir in (
-                    "/usr/share/fonts/truetype/dejavu",
-                    "/usr/share/fonts/truetype/liberation",
-                    "/usr/share/fonts/truetype/freefont",
-                    "/usr/share/fonts",
-                ):
-                    full = os.path.join(search_dir, candidate)
-                    if os.path.exists(full):
-                        return ImageFont.truetype(full, self._font_size)
-        except (IOError, OSError):
-            pass
+        if self._font_path:
+            return ImageFont.truetype(self._font_path, self._font_size)
         return ImageFont.load_default(size=self._font_size)
 
     def _random_color(self, dark: bool = True) -> tuple:
         if dark:
-            return (random.randint(0, 120), random.randint(0, 120), random.randint(0, 120))
-        return (random.randint(150, 230), random.randint(150, 230), random.randint(150, 230))
+            return (
+                random.randint(0, 120),
+                random.randint(0, 120),
+                random.randint(0, 120),
+            )
+        return (
+            random.randint(150, 230),
+            random.randint(150, 230),
+            random.randint(150, 230),
+        )
 
     def _draw_noise_lines(self, draw: ImageDraw.ImageDraw) -> None:
         for _ in range(self.NOISE_LINE_COUNT):
@@ -79,7 +73,9 @@ class TextCaptcha(BaseCaptcha):
             y1 = random.randint(0, self.HEIGHT)
             x2 = random.randint(0, self.WIDTH)
             y2 = random.randint(0, self.HEIGHT)
-            draw.line([(x1, y1), (x2, y2)], fill=self._random_color(dark=False), width=1)
+            draw.line(
+                [(x1, y1), (x2, y2)], fill=self._random_color(dark=False), width=1
+            )
 
     def _draw_noise_dots(self, draw: ImageDraw.ImageDraw) -> None:
         for _ in range(self.NOISE_DOT_COUNT):
@@ -105,7 +101,16 @@ class TextCaptcha(BaseCaptcha):
             tmp_draw = ImageDraw.Draw(tmp)
             color = self._random_color(dark=True)
             # Draw at the padded offset so the glyph is centred on the canvas
-            tmp_draw.text((pad - bbox[0], pad - bbox[1]), char, font=font, fill=color + (255,))
+            text_x = pad - bbox[0]
+            text_y = pad - bbox[1]
+            tmp_draw.text((text_x, text_y), char, font=font, fill=color + (255,))
+
+            # Crop to the actual opaque pixel bounds so font-added spacing is removed
+            # before rotation. getbbox() on the image uses the alpha channel to find
+            # the tight bounding box of non-transparent pixels.
+            pixel_bbox = tmp.getbbox()
+            if pixel_bbox:
+                tmp = tmp.crop(pixel_bbox)
 
             angle = random.randint(*self.CHAR_ROTATE_RANGE)
             rotated = tmp.rotate(angle, expand=True)
