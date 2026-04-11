@@ -21,7 +21,7 @@ app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="/static")
 # ---------------------------------------------------------------------------
 # Captcha provider — swap this one line to use a different implementation
 # ---------------------------------------------------------------------------
-captcha_provider = TextCaptcha(dot_size=4, dot_gap=2, char_gap=8)
+captcha_provider = TextCaptcha(dot_size=2, dot_gap=3)
 
 
 # ---------------------------------------------------------------------------

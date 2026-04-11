@@ -15,7 +15,7 @@ class BaseCaptcha(abc.ABC):
     """
 
     ANSWER_LENGTH = 4
-    ANSWER_CHARS = string.ascii_uppercase
+    ANSWER_CHARS = "ABCDEFGHIJKLMNOPRSTUVWXYZ"
     EXPIRY_SECONDS = 60 * 30  # 30 minutes
 
     def __init__(self) -> None:
