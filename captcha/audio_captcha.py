@@ -2,13 +2,15 @@ import os
 import random
 import struct
 import subprocess
+import tempfile
 import wave
 
 from .base import BaseCaptcha
 
 
 class AudioCaptcha(BaseCaptcha):
-    """Captcha implementation that speaks the answer aloud as a WAV file.
+    """
+    Captcha implementation that speaks the answer aloud as a WAV file.
 
     Uses espeak-ng directly via subprocess for offline TTS — no pyttsx3
     driver initialisation issues in headless/container environments.
@@ -21,28 +23,68 @@ class AudioCaptcha(BaseCaptcha):
     MEDIA_TYPE = "audio"
 
     SPEECH_RATE = 100  # WPM — slow and clear for accessibility
-    NOISE_AMPLITUDE = 400  # max per-sample noise (out of 32767)
+    NOISE_AMPLITUDE = 1500  # max per-sample noise (out of 32767)
+    PAUSE_MS = 1000  # silence between letters in milliseconds
 
     def _create_media(self, captcha_id: str, answer: str, media_dir: str) -> None:
         out_path = os.path.join(media_dir, f"{captcha_id}.wav")
 
-        # Spell out each letter separated by commas so espeak-ng inserts natural pauses
-        spoken = ",  ".join(answer.upper())
+        tmp_files = []
+        try:
+            # Generate one WAV per letter using espeak-ng
+            for letter in answer:
+                fd, tmp_path = tempfile.mkstemp(suffix=".wav")
+                os.close(fd)
+                tmp_files.append(tmp_path)
+                subprocess.run(
+                    [
+                        "espeak-ng",
+                        "-w",
+                        tmp_path,
+                        "-v",
+                        "sl",
+                        "-s",
+                        str(self.SPEECH_RATE),
+                        letter,
+                    ],
+                    check=True,
+                    capture_output=True,
+                )
 
-        subprocess.run(
-            [
-                "espeak-ng",
-                "-w", out_path,
-                "-s", str(self.SPEECH_RATE),
-                "-v", "sl",
-                # spoken,
-                "A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z",
-            ],
-            check=True,
-            capture_output=True,
-        )
+            # Merge letter WAVs with silence pauses into a single output file
+            self._merge_with_pauses(tmp_files, out_path, self.PAUSE_MS)
+        finally:
+            for f in tmp_files:
+                try:
+                    os.remove(f)
+                except OSError:
+                    pass
 
         self._add_noise(out_path)
+
+    def _merge_with_pauses(self, wav_paths: list, out_path: str, pause_ms: int) -> None:
+        """Concatenate WAV files into out_path, inserting silence between each."""
+        # Read params from the first file to determine output format
+        with wave.open(wav_paths[0], "rb") as wf:
+            params = wf.getparams()
+
+        n_channels = params.nchannels
+        sampwidth = params.sampwidth
+        framerate = params.framerate
+
+        pause_frames = int(framerate * pause_ms / 1000)
+        silence = b"\x00" * pause_frames * n_channels * sampwidth
+
+        with wave.open(out_path, "wb") as out_wf:
+            out_wf.setnchannels(n_channels)
+            out_wf.setsampwidth(sampwidth)
+            out_wf.setframerate(framerate)
+
+            for i, path in enumerate(wav_paths):
+                with wave.open(path, "rb") as wf:
+                    out_wf.writeframes(wf.readframes(wf.getnframes()))
+                if i < len(wav_paths) - 1:
+                    out_wf.writeframes(silence)
 
     def _add_noise(self, path: str) -> None:
         """Mix variable-amplitude random noise into a 16-bit PCM WAV file.
