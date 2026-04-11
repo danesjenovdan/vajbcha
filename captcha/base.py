@@ -40,15 +40,24 @@ class BaseCaptcha(abc.ABC):
         answer = self._generate_answer()
         self._create_media(captcha_id, answer, media_dir)
 
+        file_path = os.path.join(media_dir, f"{captcha_id}.{self.MEDIA_EXT}")
         expires_at = time.time() + self.EXPIRY_SECONDS
         with self._lock:
-            self._store[captcha_id] = {"answer": answer, "expires_at": expires_at}
+            self._store[captcha_id] = {
+                "answer": answer,
+                "expires_at": expires_at,
+                "file_path": file_path,
+            }
 
         media_url = (
             f"{base_url.rstrip('/')}/static/{self.MEDIA_URL_PATH}"
             f"/{captcha_id}.{self.MEDIA_EXT}"
         )
-        return {"captcha_id": captcha_id, "media_url": media_url, "media_type": self.MEDIA_TYPE}
+        return {
+            "captcha_id": captcha_id,
+            "media_url": media_url,
+            "media_type": self.MEDIA_TYPE,
+        }
 
     def verify(self, captcha_id: str, answer: str) -> bool:
         """Verify a captcha answer.
@@ -62,6 +71,7 @@ class BaseCaptcha(abc.ABC):
         Returns:
             True if the answer is correct and the captcha has not expired.
         """
+        self._cleanup()
         with self._lock:
             entry = self._store.pop(captcha_id, None)
 
@@ -70,6 +80,23 @@ class BaseCaptcha(abc.ABC):
         if time.time() > entry["expires_at"]:
             return False
         return answer.strip().upper() == entry["answer"].upper()
+
+    def _cleanup(self) -> None:
+        """Remove expired entries from the store and delete their media files."""
+        now = time.time()
+        with self._lock:
+            expired = [
+                (cid, entry["file_path"])
+                for cid, entry in self._store.items()
+                if now > entry["expires_at"]
+            ]
+            for cid, _ in expired:
+                del self._store[cid]
+        for _, file_path in expired:
+            try:
+                os.remove(file_path)
+            except OSError:
+                pass
 
     def _generate_answer(self) -> str:
         """Return a random alphanumeric answer string. Override to customise."""
