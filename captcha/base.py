@@ -77,6 +77,10 @@ class BaseCaptcha(abc.ABC):
 
         if entry is None:
             return False
+        try:
+            os.remove(entry["file_path"])
+        except OSError:
+            pass
         if time.time() > entry["expires_at"]:
             return False
         return answer.strip().upper() == entry["answer"].upper()
