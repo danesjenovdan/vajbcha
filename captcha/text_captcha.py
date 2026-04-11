@@ -2,7 +2,7 @@ import math
 import os
 import random
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 from .base import BaseCaptcha
 from .font import DotMatrixFont
@@ -28,7 +28,7 @@ class TextCaptcha(BaseCaptcha):
     GRID_SPACING = 14  # pixels between grid lines
     CHAR_ROTATE_RANGE = (-30, 30)  # degrees
     GRID_ROTATE_RANGE = (-25, 25)  # degrees
-    CHAR_JITTER_Y = 8  # pixels
+    CHAR_JITTER_Y = 20  # pixels
 
     def __init__(self, dot_size: int = 4, dot_gap: int = 2) -> None:
         super().__init__()
@@ -46,6 +46,8 @@ class TextCaptcha(BaseCaptcha):
 
         # Light blur to blend layers
         image = image.filter(ImageFilter.GaussianBlur(radius=0.5))
+
+        self._invert_region(image)
 
         out_path = os.path.join(image_dir, f"{captcha_id}.png")
         image.save(out_path, "PNG")
@@ -68,6 +70,18 @@ class TextCaptcha(BaseCaptcha):
             random.randint(180, 255),
             random.randint(180, 255),
         )
+
+    def _invert_region(self, image: Image.Image) -> None:
+        # Pick a random rectangle covering between 1/4 and 2/3 of the image area.
+        w, h = image.size
+        rw = random.randint(w // 4, int(w * 2 / 3))
+        rh = random.randint(h // 4, int(h * 2 / 3))
+        x0 = random.randint(0, w - rw)
+        y0 = random.randint(0, h - rh)
+        box = (x0, y0, x0 + rw, y0 + rh)
+        region = image.crop(box)
+        inverted = ImageChops.invert(region)
+        image.paste(inverted, box)
 
     def _draw_grid(self, image: Image.Image) -> None:
         angle = random.uniform(*self.GRID_ROTATE_RANGE)
@@ -108,32 +122,47 @@ class TextCaptcha(BaseCaptcha):
             )
 
     def _draw_characters(self, image: Image.Image, answer: str) -> None:
-        font = DotMatrixFont(dot_size=self._dot_size, dot_gap=self._dot_gap, char_gap=0)
         n = len(answer)
         slot_w = self.WIDTH // n
-        char_w = font.char_width
-        char_h = font.char_height
+        font_1x = DotMatrixFont(
+            dot_size=self._dot_size,
+            dot_gap=self._dot_gap,
+            char_gap=0,
+        )
+        char_w = font_1x.char_width
+        char_h = font_1x.char_height
         pad = max(char_w, char_h) // 2  # room for rotation without clipping
         canvas_size = (char_w + pad * 2, char_h + pad * 2)
 
         for i, char in enumerate(answer):
-            tmp = Image.new("RGBA", canvas_size, (0, 0, 0, 0))
+            # Draw at 2× scale, rotate, then downscale for crisp dots.
+            scale = 2
+            scaled_canvas = (canvas_size[0] * scale, canvas_size[1] * scale)
+            tmp = Image.new("RGBA", scaled_canvas, (0, 0, 0, 0))
             tmp_draw = ImageDraw.Draw(tmp)
             color = self._random_color(dark=False)
-            font.draw_char(tmp_draw, char, pad, pad, color + (255,))
+            font_2x = DotMatrixFont(
+                dot_size=self._dot_size * scale,
+                dot_gap=self._dot_gap * scale,
+                char_gap=0,
+            )
+            font_2x.draw_char(tmp_draw, char, pad * scale, pad * scale, color + (255,))
 
-            # Crop to the actual opaque pixel bounds to remove surrounding
-            # transparency before rotation.
             pixel_bbox = tmp.getbbox()
             if pixel_bbox:
                 tmp = tmp.crop(pixel_bbox)
 
             angle = random.randint(*self.CHAR_ROTATE_RANGE)
-            rotated = tmp.rotate(angle, expand=True)
+            rotated = tmp.rotate(angle, expand=True, resample=Image.BILINEAR)
+            # Downscale back to 1× with antialiasing
+            final = rotated.resize(
+                (rotated.width // scale, rotated.height // scale),
+                resample=Image.LANCZOS,
+            )
 
             # Target position: center of the slot with vertical jitter
-            target_x = slot_w * i + (slot_w - rotated.width) // 2
+            target_x = slot_w * i + (slot_w - final.width) // 2
             jitter_y = random.randint(-self.CHAR_JITTER_Y, self.CHAR_JITTER_Y)
-            target_y = (self.HEIGHT - rotated.height) // 2 + jitter_y
+            target_y = (self.HEIGHT - final.height) // 2 + jitter_y
 
-            image.paste(rotated, (target_x, target_y), rotated)
+            image.paste(final, (target_x, target_y), final)
