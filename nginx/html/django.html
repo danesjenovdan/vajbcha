@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Django Integration Example</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/default.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1 class="text-center my-4">Django Integration Example</h1>
+          <h2>
+            Example for simple method views and class-based views.
+          </h2>
+
+          <p class="lead">Add to <code>settings.py</code></p>
+          <pre><code class="language-python">CAPTCHA_BASE_URL = 'https://captcha.lb.djnd.si/api'</code></pre>
+
+          <p class="lead">Create <code>captcha.py</code></p>
+          <pre><code class="language-python">import requests
+from django.conf import settings
+from sentry_sdk import capture_exception, capture_message
+
+def validate_captcha(captcha_query):
+    if not captcha_query or not isinstance(captcha_query, str) or ";" not in captcha_query:
+        return False
+
+    captcha_id, captcha_answer = captcha_query.split(";", maxsplit=1)
+    if not captcha_id.isalnum() or not captcha_answer.isalnum():
+        return False
+
+    try:
+        response = requests.post(
+            f"{settings.CAPTCHA_BASE_URL}/validateCaptcha/{captcha_id}?captchaAnswer={captcha_answer}",
+            timeout=10,
+        )
+        response.raise_for_status()
+        response_json = response.json()
+    except requests.exceptions.RequestException as e:
+        capture_exception(e)
+        return False
+
+    if not isinstance(response_json, dict) or "responseCaptcha" not in response_json:
+        capture_message(f"Invalid response from captcha api: {response_json}")
+        return False
+
+    return response_json["responseCaptcha"] == "success"</code></pre>
+
+          <p class="lead">Validate in <code>views.py</code> or <code>api.py</code></p>
+          <pre><code class="language-python">from module.captcha import validate_captcha
+
+def post(self, request, *args, **kwargs):
+    captcha_validated = validate_captcha(request.GET.get('captcha-answer', ''))
+    if not captcha_validated:
+        return Response({'status': 'Invalid CAPTCHA answer'}, status.HTTP_403_FORBIDDEN)</code></pre>
+
+          <p class="lead">In <code>template.html</code></p>
+          <p>
+            Instead of an <code>&lt;input&gt;</code> insert the
+            <code>&lt;script&gt;</code> tag directly and set the
+            <code>data-input-name</code> attribute to the name of the input
+            field backend expects.
+          </p>
+          <pre><code class="language-html"><textarea><form method="post">
+  <!-- other fields -->
+  <div class="form-field">
+    <label for="email_1">Email:</label>
+    <input type="text" id="email_1" name="email">
+  </div>
+  <!-- captcha field -->
+  <div class="form-field">
+    <label>CAPTCHA:</label>
+    <script src="https://captcha.lb.djnd.si/js/djncaptcha.js" data-input-name="captcha-answer"></script>
+  </div>
+</form></textarea></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

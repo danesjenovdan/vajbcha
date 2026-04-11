@@ -5,9 +5,18 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./vajbcha/captcha:/app/captcha
-      - ./vajbcha/static:/app/static
-      - ./vajbcha/app.py:/app/app.py
+      - ./vajbcha/captcha:/app/captcha:delegated,rw
+      - ./vajbcha/static:/app/static:delegated,rw
+      - ./vajbcha/app.py:/app/app.py:delegated,rw
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:delegated,rw
+      - ./nginx/conf.d/default.dev.conf:/etc/nginx/conf.d/default.conf:delegated,rw
+      - ./nginx/html:/usr/share/nginx/html:delegated,rw
