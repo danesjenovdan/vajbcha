@@ -1,0 +1,29 @@
+name: Check formatting
+on:
+  push:
+    branches:
+      - "main"
+jobs:
+  check_python_formatting:
+    name: Check Python formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: |
+          pip install black isort
+
+      - name: Check formatting with black
+        run: |
+          (cd ./vajbcha && black . --check --diff)
+
+      - name: Check formatting with isort
+        run: |
+          (cd ./vajbcha && isort . --check --diff --profile black)
