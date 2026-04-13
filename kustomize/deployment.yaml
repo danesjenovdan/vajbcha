@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vajbcha
+  labels:
+    app: vajbcha
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vajbcha
+  template:
+    metadata:
+      labels:
+        app: vajbcha
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: vajbcha-api
+          image: vajbcha
+          command:
+            - gunicorn
+            - app:app
+            - -b
+            - 0.0.0.0:5000
+            - --log-level
+            - DEBUG
+            - --workers
+            - "1"
+            - --threads
+            - "3"
+            - --timeout
+            - "60"
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              memory: 500Mi
+              cpu: 500m
+            limits:
+              memory: 500Mi
+              cpu: 500m
+        - name: vajbcha-nginx
+          image: vajbcha-nginx
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 100m
+            limits:
+              memory: 100Mi
+              cpu: 100m
