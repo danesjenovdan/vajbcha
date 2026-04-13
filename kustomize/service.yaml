@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vajbcha-api
+spec:
+  selector:
+    app: vajbcha
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vajbcha-nginx
+spec:
+  selector:
+    app: vajbcha
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
