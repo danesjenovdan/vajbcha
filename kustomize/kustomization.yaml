@@ -8,7 +8,7 @@ resources:
 images:
   - name: vajbcha
     newName: rg.fr-par.scw.cloud/djnd/vajbcha
-    newTag: '4227f61cd1e3b5aa44ed88d457f512ea3823a297'
+    newTag: '22568bdea8a9e1f3d21b924e3b8a1c424cd2f7d3'
   - name: vajbcha-nginx
     newName: rg.fr-par.scw.cloud/djnd/vajbcha-nginx
-    newTag: '4227f61cd1e3b5aa44ed88d457f512ea3823a297'
+    newTag: '22568bdea8a9e1f3d21b924e3b8a1c424cd2f7d3'
