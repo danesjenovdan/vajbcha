@@ -44,7 +44,7 @@
   const iframe = document.createElement("iframe");
   iframe.style.display = "block";
   iframe.style.width = "282px";
-  iframe.style.height = "168px";
+  iframe.style.height = "169px";
   iframe.style.backgroundColor = "transparent";
   iframe.style.border = "0";
 
